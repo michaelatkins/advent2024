@@ -16,11 +16,35 @@ pub fn main() {
       |> list.flatten
     Error(_) -> panic as "WTF file"
   }
-  let word = "XMAS"
-  find_word(split(word, ""), matrix, #("", []))
-  |> filter(fn(x) { list.length(x.1) == string.length(word) })
+  let word = "MAS"
+  let main_list =
+    find_word(split(word, ""), matrix, #("", []))
+    |> filter(fn(x) {
+      list.length(x.1) == string.length(word)
+      && { x.0 == "UL" || x.0 == "UR" || x.0 == "DL" || x.0 == "DR" }
+    })
+
+  main_list
+  |> filter(fn(x) {
+    let match =
+      list.find(main_list, fn(y) {
+        let xa = unwrap(list.first(list.drop(x.1, 1)), #(-1, -1, ""))
+        let ya = unwrap(list.first(list.drop(y.1, 1)), #(-1, -1, ""))
+        x.0 != y.0 && xa.0 == ya.0 && xa.1 == ya.1 && xa.2 != "" && ya.2 != ""
+      })
+
+    case match {
+      Ok(_) -> True
+      _ -> False
+    }
+  })
   |> list.length
+  |> int.divide(2)
   |> io.debug
+}
+
+pub fn or_empty(result) {
+  unwrap(result, [])
 }
 
 pub fn find_word(
